@@ -55,3 +55,9 @@ def test_faithfulness_penalizes_invented_facts():
     ctx = "Livrarea standard costă 50 de lei."
     assert faithfulness("Livrarea standard costă 50 de lei.", ctx) == 1.0
     assert faithfulness("Livrarea expres costă 120 de lei prin DHL.", ctx) <= 0.5
+
+
+def test_answer_recall_ignores_extra_words():
+    from rag_lab.metrics import answer_recall
+    assert answer_recall("Livrarea standard costă 50 de lei în toată țara.", "50 de lei") == 1.0
+    assert answer_recall("Costă 80 de lei.", "50 de lei") == 0.5

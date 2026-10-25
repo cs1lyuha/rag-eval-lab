@@ -10,6 +10,7 @@ Retrieval (pe intervale de caractere, independent de chunking):
 
 Răspuns:
 - token F1 față de răspunsul de referință (ca la SQuAD);
+- answer recall: ce fracție din cuvintele de conținut ale referinței apare în răspuns;
 - faithfulness (aproximare fără LLM): ce fracție din cuvintele de conținut
   ale răspunsului apar în contextul primit; un răspuns inventat are scor mic.
 """
@@ -80,6 +81,15 @@ def token_f1(prediction: str, reference: str) -> float:
         return 0.0
     precision, recall = common / len(pred), common / len(ref)
     return 2 * precision * recall / (precision + recall)
+
+
+def answer_recall(prediction: str, reference: str) -> float:
+    """Ce fracție din informația răspunsului de referință apare în răspuns.
+    Mai potrivită decât F1 când răspunsul e o propoziție întreagă, iar referința e scurtă."""
+    ref = set(tokens(reference))
+    if not ref:
+        return 1.0
+    return len(ref & set(tokens(prediction))) / len(ref)
 
 
 def faithfulness(answer: str, context: str) -> float:
