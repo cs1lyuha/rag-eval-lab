@@ -19,7 +19,9 @@ class Section:
     doc: str          # numele fișierului fără .md
     title: str        # titlul secțiunii
     text: str         # textul secțiunii, fără titlu
-    start: int        # poziția în textul complet al documentului
+    start: int        # unde începe textul secțiunii în documentul complet
+    end: int          # unde se termină
+    heading_start: int  # unde începe linia `## Titlu`
 
     @property
     def id(self) -> str:
@@ -47,8 +49,10 @@ def parse_document(name: str, raw: str) -> Document:
     headings = list(re.finditer(r"^## (.+)$", raw, flags=re.M))
     for i, h in enumerate(headings):
         end = headings[i + 1].start() if i + 1 < len(headings) else len(raw)
-        body = raw[h.end():end].strip()
-        sections.append(Section(name, h.group(1).strip(), body, h.end()))
+        chunk = raw[h.end():end]
+        body = chunk.strip()
+        start = h.end() + (len(chunk) - len(chunk.lstrip()))
+        sections.append(Section(name, h.group(1).strip(), body, start, start + len(body), h.start()))
     return Document(name, title, raw, tuple(sections))
 
 
